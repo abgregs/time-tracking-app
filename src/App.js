@@ -99,7 +99,7 @@ function App() {
               onDeleteClick={this.handleDeleteClick}
             />
             <ToggleableTimerForm
-              onFormSubmit={this.handleDeleteClick}
+              onFormSubmit={this.handleCreateFormSubmit}
             />
           </div>
         </Container>

@@ -1,9 +1,5 @@
 import React from 'react';
-import {  
-  millisecondsToHuman,
-  newTimer,
-  findById,
-  renderElapsedString } from './helpers.js';
+import * as helpers from './helpers.js';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -49,13 +45,27 @@ function App() {
         },
       ],
     };
+
+    handleCreateFormSubmit = (timer) => {
+      this.createTimer(timer);
+    };
+
+    createTimer = (timer) => {
+      const t = helpers.newTimer(timer);
+      this.setState({
+        timers: this.state.timers.concat(t),
+      });
+    };
+
     render() {
       return (
         <Container maxWidth='sm'>
           <div className='column'>
             <EditableTimerList 
               timers={this.state.timers}/>
-            <ToggleableTimerForm/>
+            <ToggleableTimerForm
+              onFormSubmit={this.handleCreateFormSubmit}
+            />
           </div>
         </Container>
       );
@@ -70,10 +80,23 @@ function App() {
     handleFormOpen = () => {
       this.setState({ isOpen: true });
     };
+
+    handleFormClose = () => {
+      this.setState({ isOpen: false });
+    };
+  
+    handleFormSubmit = (timer) => {
+      this.props.onFormSubmit(timer);
+      this.setState({ isOpen: false });
+    };
+
     render() {
       if (this.state.isOpen) {
         return (
-          <TimerForm />
+          <TimerForm 
+            onFormSubmit={this.handleFormSubmit}
+            onFormClose={this.handleFormClose}
+          />
         );
       } else {
         return (
@@ -135,7 +158,7 @@ function App() {
 
   class Timer extends React.Component {
     render() {
-      const elapsedString = renderElapsedString(this.props.elapsed);
+      const elapsedString = helpers.renderElapsedString(this.props.elapsed);
       return (
         <Card variant='outlined' sx={{ textAlign: 'center', mb: 4 }}>
           <CardContent>
@@ -167,6 +190,14 @@ function App() {
       title: this.props.title || '',
       project: this.props.project || '',
     };
+
+    handleSubmit = () => {
+      this.props.onFormSubmit({
+        id: this.props.id,
+        title: this.state.title,
+        project: this.state.project,
+      });
+    };
   
     handleTitleChange = (e) => {
       this.setState({ title: e.target.value });
@@ -175,8 +206,9 @@ function App() {
     handleProjectChange = (e) => {
       this.setState({ project: e.target.value });
     };
+
     render() {
-      const submitText = this.props.title ? 'Update' : 'Create';
+      const submitText = this.props.id ? 'Update' : 'Create';
       return (
         <Card variant='outlined' sx={{ mb: 4 }}>
           <CardContent>
@@ -190,7 +222,8 @@ function App() {
                   sx={{ mb: 2 }}
                 />
                 <InputLabel htmlFor='input-project'>Project</InputLabel>
-                <Input type='text'
+                <Input 
+                  type='text'
                   id='input-project'
                   value={this.props.project}
                   onChange={this.handleProjectChange}
@@ -199,8 +232,15 @@ function App() {
             </Box>
             <Box sx={{ textAlign: 'center' }}>
               <ButtonGroup disableElevation>
-                <Button variant='contained'>{submitText}</Button>
-                <Button variant='outlined'>Cancel</Button>
+                <Button 
+                  variant='contained' 
+                  onClick={this.handleSubmit}>
+                    {submitText}
+                </Button>
+                <Button variant='outlined' 
+                  onClick={this.props.onFormClose}>
+                    Cancel
+                </Button>
               </ButtonGroup>
             </Box>
           </CardContent>
@@ -214,7 +254,13 @@ function App() {
   return (
     <div className='App'>
       <header className='App-header'>
-        <Typography variant='h2' sx={{ textAlign: 'center', fontWeight: 300 }} my={2} className='app-title'>Timers</Typography>
+        <Typography 
+          variant='h2' 
+          sx={{ textAlign: 'center', fontWeight: 300 }} 
+          my={2} 
+          className='app-title'>
+            Timers
+        </Typography>
       </header>
         <div id='main' className='main'>
           <div id='content'>

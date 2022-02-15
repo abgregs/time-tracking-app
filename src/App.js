@@ -8,7 +8,6 @@ import '@fontsource/roboto/700.css';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -23,8 +22,6 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import { IconButton } from '@mui/material';
   
 function App() {
-
-  const theme = useTheme();
 
   class TimersDashboard extends React.Component {
     state = {

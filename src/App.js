@@ -54,6 +54,18 @@ function App() {
       this.createTimer(timer);
     };
 
+    handleDeleteClick = (timerId) => {
+      this.deleteTimer(timerId);
+
+    }
+
+    deleteTimer = (timerId) => {
+      this.setState({
+        timers: this.state.timers.filter(timer => 
+          timer.id !== timerId)
+      });
+    }
+
     updateTimer = (attrs) => {
       this.setState({
         timers: this.state.timers.map((timer) => 
@@ -84,9 +96,10 @@ function App() {
             <EditableTimerList 
               timers={this.state.timers}
               onFormSubmit={this.handleEditFormSubmit}
+              onDeleteClick={this.handleDeleteClick}
             />
             <ToggleableTimerForm
-              onFormSubmit={this.handleCreateFormSubmit}
+              onFormSubmit={this.handleDeleteClick}
             />
           </div>
         </Container>
@@ -141,6 +154,7 @@ function App() {
           elapsed={timer.elapsed}
           runningSince={timer.runningSince}
           onFormSubmit={this.props.onFormSubmit}
+          onDeleteClick={this.props.onDeleteClick}
         />
       ));
       return (
@@ -159,7 +173,7 @@ function App() {
     handleEditClick = () => {
       this.openForm();
     };
-  
+
     handleFormClose = () => {
       this.closeForm();
     };
@@ -197,6 +211,7 @@ function App() {
             elapsed={this.props.elapsed}
             runningSince={this.props.runningSince}
             onEditClick={this.handleEditClick}
+            onDeleteClick={this.props.onDeleteClick}
           />
         );
       }
@@ -204,6 +219,11 @@ function App() {
   }
 
   class Timer extends React.Component {
+
+    handleDeleteClick = () => {
+      this.props.onDeleteClick(this.props.id);
+    }
+
     render() {
       const elapsedString = helpers.renderElapsedString(this.props.elapsed);
       return (
@@ -222,7 +242,7 @@ function App() {
                 <IconButton onClick={this.props.onEditClick} sx={{ color: 'text.primary', '&:hover': { color: 'primary.main'} }}>
                   <EditIcon></EditIcon>
                 </IconButton>
-                <IconButton sx={{ color: 'text.primary', '&:hover': { color: 'primary.main'} }}>
+                <IconButton onClick={this.handleDeleteClick} sx={{ color: 'text.primary', '&:hover': { color: 'primary.main'} }}>
                   <DeleteForeverIcon></DeleteForeverIcon>
                 </IconButton>
               </Box>

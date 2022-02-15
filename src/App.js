@@ -17,10 +17,10 @@ import Typography from '@mui/material/Typography';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
-import Input from '@mui/material/Input';
+import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
-import InputLabel from '@mui/material/InputLabel';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import { IconButton } from '@mui/material';
   
 function App() {
 
@@ -46,9 +46,29 @@ function App() {
       ],
     };
 
+    handleEditFormSubmit = (attrs) => {
+      this.updateTimer(attrs);
+    };
+
     handleCreateFormSubmit = (timer) => {
       this.createTimer(timer);
     };
+
+    updateTimer = (attrs) => {
+      this.setState({
+        timers: this.state.timers.map((timer) => 
+        {
+          if (timer.id === attrs.id) {
+            return Object.assign({}, timer, {
+              title: attrs.title,
+              project: attrs.project,
+            });
+          } else {
+            return timer;
+          }
+        })
+      });
+    }
 
     createTimer = (timer) => {
       const t = helpers.newTimer(timer);
@@ -62,7 +82,9 @@ function App() {
         <Container maxWidth='sm'>
           <div className='column'>
             <EditableTimerList 
-              timers={this.state.timers}/>
+              timers={this.state.timers}
+              onFormSubmit={this.handleEditFormSubmit}
+            />
             <ToggleableTimerForm
               onFormSubmit={this.handleCreateFormSubmit}
             />
@@ -118,6 +140,7 @@ function App() {
           project={timer.project}
           elapsed={timer.elapsed}
           runningSince={timer.runningSince}
+          onFormSubmit={this.props.onFormSubmit}
         />
       ));
       return (
@@ -132,7 +155,28 @@ function App() {
     state = {
       editFormOpen: false,
     };
+
+    handleEditClick = () => {
+      this.openForm();
+    };
   
+    handleFormClose = () => {
+      this.closeForm();
+    };
+
+    handleSubmit = (timer) => {
+      this.props.onFormSubmit(timer);
+      this.closeForm();
+    };
+  
+    closeForm = () => {
+      this.setState({ editFormOpen: false });
+    };
+  
+    openForm = () => {
+      this.setState({ editFormOpen: true });
+    };
+
     render() {
       if (this.state.editFormOpen) {
         return (
@@ -140,6 +184,8 @@ function App() {
             id={this.props.id}
             title={this.props.title}
             project={this.props.project}
+            onFormSubmit={this.handleSubmit}
+            onFormClose={this.handleFormClose}
           />
         );
       } else {
@@ -150,6 +196,7 @@ function App() {
             project={this.props.project}
             elapsed={this.props.elapsed}
             runningSince={this.props.runningSince}
+            onEditClick={this.handleEditClick}
           />
         );
       }
@@ -164,7 +211,7 @@ function App() {
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: 'left', flexWrap: 'wrap' }}>
-                <Typography component='div' variant='h5'>
+                <Typography component='div' variant='h5' color='text.primary' >
                   {this.props.title}
                 </Typography>
                 <Typography variant='subtitle1' color='text.secondary' component='div'>
@@ -172,7 +219,12 @@ function App() {
                 </Typography>
               </Box>
               <Box>
-                <EditIcon></EditIcon><DeleteForeverIcon></DeleteForeverIcon>
+                <IconButton onClick={this.props.onEditClick} sx={{ color: 'text.primary', '&:hover': { color: 'primary.main'} }}>
+                  <EditIcon></EditIcon>
+                </IconButton>
+                <IconButton sx={{ color: 'text.primary', '&:hover': { color: 'primary.main'} }}>
+                  <DeleteForeverIcon></DeleteForeverIcon>
+                </IconButton>
               </Box>
             </Box>
             <Typography variant='h4' sx={{ textAlign: 'center', mb: 2 }} color='text.primary' component='div'>
@@ -212,22 +264,22 @@ function App() {
       return (
         <Card variant='outlined' sx={{ mb: 4 }}>
           <CardContent>
-            <Box sx={{ mb: 2 }}>
-                <InputLabel htmlFor='input-title'>Title</InputLabel>
-                <Input 
-                  type='text'
-                  id='input-title'
-                  value={this.props.title}
+            <Box sx={{ mb: 4 }}>
+                <TextField 
+                  label='Title'
+                  id='title-field'
+                  value={this.state.title}
                   onChange={this.handleTitleChange}
-                  sx={{ mb: 2 }}
+                  variant='standard'
+                  sx={{ mb: 2, display: 'block' }}
                 />
-                <InputLabel htmlFor='input-project'>Project</InputLabel>
-                <Input 
-                  type='text'
-                  id='input-project'
-                  value={this.props.project}
+                <TextField 
+                  label='Project'
+                  id='project-field'
+                  value={this.state.project}
                   onChange={this.handleProjectChange}
-                  sx={{ mb: 2 }}
+                  variant='standard'
+                  sx={{ mb: 2, display: 'block' }}
                 />
             </Box>
             <Box sx={{ textAlign: 'center' }}>
@@ -256,7 +308,8 @@ function App() {
       <header className='App-header'>
         <Typography 
           variant='h2' 
-          sx={{ textAlign: 'center', fontWeight: 300 }} 
+          sx={{ textAlign: 'center', fontWeight: 300 }}
+          color='text.primary'
           my={2} 
           className='app-title'>
             Timers

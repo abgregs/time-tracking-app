@@ -53,8 +53,15 @@ function App() {
 
     handleDeleteClick = (timerId) => {
       this.deleteTimer(timerId);
-
     }
+
+    handleStartClick = (timerId) => {
+      this.startTimer(timerId);
+    };
+  
+    handleStopClick = (timerId) => {
+      this.stopTimer(timerId);
+    };
 
     deleteTimer = (timerId) => {
       this.setState({
@@ -86,6 +93,40 @@ function App() {
       });
     };
 
+    startTimer = (timerId) => {
+      const now = Date.now();
+  
+      this.setState({
+        timers: this.state.timers.map((timer) => {
+          if (timer.id === timerId) {
+            return Object.assign({}, timer, {
+              runningSince: now,
+            });
+          } else {
+            return timer;
+          }
+        }),
+      });
+    };
+
+    stopTimer = (timerId) => {
+      const now = Date.now();
+  
+      this.setState({
+        timers: this.state.timers.map((timer) => {
+          if (timer.id === timerId) {
+            const lastElapsed = now - timer.runningSince;
+            return Object.assign({}, timer, {
+              elapsed: timer.elapsed + lastElapsed,
+              runningSince: null,
+            });
+          } else {
+            return timer;
+          }
+        }),
+      });
+    };
+
     render() {
       return (
         <Container maxWidth='sm'>
@@ -94,6 +135,8 @@ function App() {
               timers={this.state.timers}
               onFormSubmit={this.handleEditFormSubmit}
               onDeleteClick={this.handleDeleteClick}
+              onStartClick={this.handleStartClick}
+              onStopClick={this.handleStopClick}
             />
             <ToggleableTimerForm
               onFormSubmit={this.handleCreateFormSubmit}
@@ -152,6 +195,8 @@ function App() {
           runningSince={timer.runningSince}
           onFormSubmit={this.props.onFormSubmit}
           onDeleteClick={this.props.onDeleteClick}
+          onStartClick={this.props.onStartClick}
+          onStopClick={this.props.onStopClick}
         />
       ));
       return (
@@ -209,6 +254,8 @@ function App() {
             runningSince={this.props.runningSince}
             onEditClick={this.handleEditClick}
             onDeleteClick={this.props.onDeleteClick}
+            onStartClick={this.props.onStartClick}
+            onStopClick={this.props.onStopClick}
           />
         );
       }
@@ -217,12 +264,29 @@ function App() {
 
   class Timer extends React.Component {
 
+    componentDidMount() {
+      this.forceUpdateInterval = setInterval(() => this.forceUpdate(), 50
+      );
+    }
+  
+    componentWillUnmount() {
+      clearInterval(this.forceUpdateInterval);
+    }
+
     handleDeleteClick = () => {
       this.props.onDeleteClick(this.props.id);
     }
 
+    handleStartClick = () => {
+      this.props.onStartClick(this.props.id);
+    };
+  
+    handleStopClick = () => {
+      this.props.onStopClick(this.props.id);
+    };
+
     render() {
-      const elapsedString = helpers.renderElapsedString(this.props.elapsed);
+      const elapsedString = helpers.renderElapsedString(this.props.elapsed, this.props.runningSince);
       return (
         <Card variant='outlined' sx={{ textAlign: 'center', mb: 4 }}>
           <CardContent>
@@ -247,10 +311,29 @@ function App() {
             <Typography variant='h4' sx={{ textAlign: 'center', mb: 2 }} color='text.primary' component='div'>
               {elapsedString}
             </Typography>
-            <Button variant='contained'>Start</Button>
+            <TimerActionButton
+              timerIsRunning = {!!this.props.runningSince}
+              onStartClick={this.handleStartClick}
+              onStopClick={this.handleStopClick}
+            />
           </CardContent>
         </Card>
       );
+    }
+  }
+
+  class TimerActionButton extends React.Component {
+    render() {
+      if (this.props.timerIsRunning) {
+        return (
+          <Button variant='contained' onClick={this.props.onStopClick}>Stop</Button>
+        )
+      } else {
+        return (
+          <Button variant='contained' onClick={this.props.onStartClick}>Start</Button>
+        )
+      }
+      
     }
   }
 

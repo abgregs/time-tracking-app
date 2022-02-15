@@ -5,12 +5,12 @@ import {
   findById,
   renderElapsedString } from './helpers.js';
 
-
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+import { v4 as uuidv4 } from 'uuid';
 
 import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
@@ -31,14 +31,31 @@ function App() {
   const theme = useTheme();
 
   class TimersDashboard extends React.Component {
+    state = {
+      timers: [
+        {
+          title: 'Learn React',
+          project: 'Web Domination',
+          id: uuidv4(),
+          elapsed: 8986300,
+          runningSince: Date.now(),
+        },
+        {
+          title: 'Watch Ted Lasso',
+          project: 'Football is Life',
+          id: uuidv4(),
+          elapsed: 3890985,
+          runningSince: null,
+        },
+      ],
+    };
     render() {
       return (
         <Container maxWidth='sm'>
           <div className='column'>
-            <EditableTimerList />
-            <ToggleableTimerForm
-              isOpen={true}
-            />
+            <EditableTimerList 
+              timers={this.state.timers}/>
+            <ToggleableTimerForm/>
           </div>
         </Container>
       );
@@ -46,15 +63,22 @@ function App() {
   }
 
   class ToggleableTimerForm extends React.Component {
+    state = {
+      isOpen: false,
+    };
+  
+    handleFormOpen = () => {
+      this.setState({ isOpen: true });
+    };
     render() {
-      if (this.props.isOpen) {
+      if (this.state.isOpen) {
         return (
           <TimerForm />
         );
       } else {
         return (
           <Box sx={{textAlign: 'center' }}>
-            <Button variant='contained'><AddIcon></AddIcon></Button>
+            <Button variant='contained' onClick={this.handleFormOpen}><AddIcon></AddIcon></Button>
           </Box>
         );
       }
@@ -63,32 +87,34 @@ function App() {
 
   class EditableTimerList extends React.Component {
     render() {
+      const timers = this.props.timers.map((timer) => (
+        <EditableTimer
+          key={timer.id}
+          id={timer.id}
+          title={timer.title}
+          project={timer.project}
+          elapsed={timer.elapsed}
+          runningSince={timer.runningSince}
+        />
+      ));
       return (
         <div id='timers'>
-          <EditableTimer
-            title='Learn React'
-            project='Web Domination'
-            elapsed='8986300'
-            runningSince={null}
-            editFormOpen={false}
-          />
-          <EditableTimer
-            title='Watch Ted Lasso'
-            project='Football is Life'
-            elapsed='3890985'
-            runningSince={null}
-            editFormOpen={true}
-          />
+          {timers}
         </div>
-      );
+      )
     }
   }
 
   class EditableTimer extends React.Component {
+    state = {
+      editFormOpen: false,
+    };
+  
     render() {
-      if (this.props.editFormOpen) {
+      if (this.state.editFormOpen) {
         return (
           <TimerForm
+            id={this.props.id}
             title={this.props.title}
             project={this.props.project}
           />
@@ -96,6 +122,7 @@ function App() {
       } else {
         return (
           <Timer
+            id={this.props.id}
             title={this.props.title}
             project={this.props.project}
             elapsed={this.props.elapsed}
@@ -136,16 +163,39 @@ function App() {
   }
 
   class TimerForm extends React.Component {
+    state = {
+      title: this.props.title || '',
+      project: this.props.project || '',
+    };
+  
+    handleTitleChange = (e) => {
+      this.setState({ title: e.target.value });
+    };
+  
+    handleProjectChange = (e) => {
+      this.setState({ project: e.target.value });
+    };
     render() {
       const submitText = this.props.title ? 'Update' : 'Create';
       return (
         <Card variant='outlined' sx={{ mb: 4 }}>
           <CardContent>
             <Box sx={{ mb: 2 }}>
-                <InputLabel htmlFor='component-simple'>Title</InputLabel>
-                <Input id='component-simple' value={this.props.title} sx={{ mb: 2 }}/>
-                <InputLabel htmlFor='component-simple'>Project</InputLabel>
-                <Input id='component-simple' value={this.props.project} sx={{ mb: 2 }}/>
+                <InputLabel htmlFor='input-title'>Title</InputLabel>
+                <Input 
+                  type='text'
+                  id='input-title'
+                  value={this.props.title}
+                  onChange={this.handleTitleChange}
+                  sx={{ mb: 2 }}
+                />
+                <InputLabel htmlFor='input-project'>Project</InputLabel>
+                <Input type='text'
+                  id='input-project'
+                  value={this.props.project}
+                  onChange={this.handleProjectChange}
+                  sx={{ mb: 2 }}
+                />
             </Box>
             <Box sx={{ textAlign: 'center' }}>
               <ButtonGroup disableElevation>

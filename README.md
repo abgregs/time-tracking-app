@@ -2,6 +2,9 @@
 
 This is an app that lets users create and manage a list of timers. It's a learning project built with React.
 
+## View the Project
+You can view a [live version of the project here](https://abgregs.github.io/time-tracking-app/)
+
 ## Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app). 
